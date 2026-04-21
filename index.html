@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hermes 手机编程演示</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0a0a0f;
+      color: #e0e0e0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .container { max-width: 600px; text-align: center; }
+    h1 { font-size: 2.5rem; margin-bottom: 1rem; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    p { color: #888; line-height: 1.8; margin-bottom: 2rem; }
+    .badge {
+      display: inline-block;
+      padding: 0.5rem 1.5rem;
+      background: linear-gradient(135deg, #667eea22, #764ba222);
+      border: 1px solid #667eea55;
+      border-radius: 2rem;
+      font-size: 0.9rem;
+      color: #667eea;
+    }
+    .time { margin-top: 2rem; color: #555; font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🚀 Hermes 手机编程</h1>
+    <p>你在手机上说需求<br>我来写代码、推送到 GitHub<br>自动同步到 Cloudflare Pages<br>你在线查看效果</p>
+    <span class="badge">✓ 部署成功</span>
+    <div class="time">部署时间：<span id="time"></span></div>
+  </div>
+  <script>
+    document.getElementById('time').textContent = new Date().toLocaleString('zh-CN');
+  </script>
+</body>
+</html>
