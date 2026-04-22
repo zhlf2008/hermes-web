@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>数据填报系统</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f6fa; min-height: 100vh; padding: 16px; }
+    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 16px; text-align: center; }
+    .header h1 { font-size: 20px; margin-bottom: 4px; }
+    .header p { font-size: 12px; opacity: 0.8; }
+    .card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .card-title { font-size: 16px; font-weight: 600; color: #333; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #667eea; }
+    .form-item { margin-bottom: 14px; }
+    .form-item label { display: block; font-size: 13px; color: #666; margin-bottom: 6px; }
+    .form-item input { width: 100%; padding: 12px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 16px; transition: border-color 0.2s; -webkit-appearance: none; }
+    .form-item input:focus { outline: none; border-color: #667eea; }
+    .result { background: #f0f1ff; border-radius: 8px; padding: 14px; margin-top: 12px; text-align: center; }
+    .result-label { font-size: 12px; color: #666; margin-bottom: 4px; }
+    .result-value { font-size: 28px; font-weight: 700; color: #667eea; }
+    .btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+    .btn:active { opacity: 0.9; }
+    .history-title { font-size: 14px; color: #666; margin-bottom: 10px; }
+    .history-item { background: #f9f9f9; border-radius: 8px; padding: 12px; margin-bottom: 8px; font-size: 12px; color: #555; }
+    .history-item .time { color: #999; font-size: 11px; margin-bottom: 4px; }
+    .history-item .data { display: flex; gap: 12px; flex-wrap: wrap; }
+    .history-item .tag { background: #e8eaff; color: #667eea; padding: 2px 8px; border-radius: 4px; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+    .tab { flex: 1; padding: 10px; background: white; border: 1px solid #e0e0e0; border-radius: 8px; text-align: center; font-size: 14px; cursor: pointer; }
+    .tab.active { background: #667eea; color: white; border-color: #667eea; }
+    .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 20px; border-radius: 8px; font-size: 14px; z-index: 999; opacity: 0; transition: opacity 0.3s; }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>📊 数据填报系统</h1>
+    <p>每日数据上报</p>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('online')">📶 上线率</div>
+    <div class="tab" onclick="switchTab('homework')">📝 作业率</div>
+    <div class="tab" onclick="switchTab('history')">📋 历史</div>
+  </div>
+
+  <!-- 上线率填报 -->
+  <div id="online-panel" class="card">
+    <div class="card-title">📶 上线率填报</div>
+    <div class="form-item">
+      <label>应到人数</label>
+      <input type="number" id="totalCount" placeholder="输入应到人数" min="0">
+    </div>
+    <div class="form-item">
+      <label>实到人数</label>
+      <input type="number" id="actualCount" placeholder="输入实到人数" min="0">
+    </div>
+    <div class="form-item">
+      <label>请假人数</label>
+      <input type="number" id="leaveCount" placeholder="输入请假人数" min="0">
+    </div>
+    <div class="form-item">
+      <label>视频人数</label>
+      <input type="number" id="videoCount" placeholder="输入视频人数" min="0">
+    </div>
+    <div class="result">
+      <div class="result-label">上线率</div>
+      <div class="result-value" id="onlineRate">—</div>
+    </div>
+    <button class="btn" onclick="saveOnline()">保存上报</button>
+  </div>
+
+  <!-- 作业率填报 -->
+  <div id="homework-panel" class="card" style="display:none;">
+    <div class="card-title">📝 作业率填报</div>
+    <div class="form-item">
+      <label>应做作业人数</label>
+      <input type="number" id="homeworkTotal" placeholder="输入应做作业人数" min="0">
+    </div>
+    <div class="form-item">
+      <label>作业完成人数</label>
+      <input type="number" id="homeworkDone" placeholder="输入完成人数" min="0">
+    </div>
+    <div class="result">
+      <div class="result-label">作业率</div>
+      <div class="result-value" id="homeworkRate">—</div>
+    </div>
+    <button class="btn" onclick="saveHomework()">保存上报</button>
+  </div>
+
+  <!-- 历史记录 -->
+  <div id="history-panel" class="card" style="display:none;">
+    <div class="card-title">📋 历史记录</div>
+    <div id="history-list"></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // 公式说明：
+    // 上线率 = ((实到人数 + 请假人数) / 应到人数 - 请假人数 * 0.01) * 100%
+    // 作业率 = 完成人数 / 应做人数 * 100%
+
+    function calcOnlineRate() {
+      const total = parseFloat(document.getElementById('totalCount').value) || 0;
+      const actual = parseFloat(document.getElementById('actualCount').value) || 0;
+      const leave = parseFloat(document.getElementById('leaveCount').value) || 0;
+      if (total <= 0) return '—';
+      const rate = ((actual + leave) / total - leave * 0.01) * 100;
+      return rate.toFixed(2) + '%';
+    }
+
+    function calcHomeworkRate() {
+      const total = parseFloat(document.getElementById('homeworkTotal').value) || 0;
+      const done = parseFloat(document.getElementById('homeworkDone').value) || 0;
+      if (total <= 0) return '—';
+      const rate = (done / total) * 100;
+      return rate.toFixed(2) + '%';
+    }
+
+    // 实时计算
+    document.getElementById('totalCount').addEventListener('input', () => { document.getElementById('onlineRate').textContent = calcOnlineRate(); });
+    document.getElementById('actualCount').addEventListener('input', () => { document.getElementById('onlineRate').textContent = calcOnlineRate(); });
+    document.getElementById('leaveCount').addEventListener('input', () => { document.getElementById('onlineRate').textContent = calcOnlineRate(); });
+    document.getElementById('homeworkTotal').addEventListener('input', () => { document.getElementById('homeworkRate').textContent = calcHomeworkRate(); });
+    document.getElementById('homeworkDone').addEventListener('input', () => { document.getElementById('homeworkRate').textContent = calcHomeworkRate(); });
+
+    function getRecords() {
+      return JSON.parse(localStorage.getItem('dataRecords') || '[]');
+    }
+
+    function saveRecords(records) {
+      localStorage.setItem('dataRecords', JSON.stringify(records));
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2000);
+    }
+
+    function formatDate(d) {
+      const pad = n => n.toString().padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    function saveOnline() {
+      const total = parseFloat(document.getElementById('totalCount').value);
+      const actual = parseFloat(document.getElementById('actualCount').value);
+      const leave = parseFloat(document.getElementById('leaveCount').value);
+      const video = parseFloat(document.getElementById('videoCount').value);
+      if (!total && total !== 0) { showToast('请输入应到人数'); return; }
+      const records = getRecords();
+      records.unshift({ type: 'online', total, actual, leave, video, rate: calcOnlineRate(), time: formatDate(new Date()) });
+      saveRecords(records);
+      showToast('上线率已保存 ✓');
+      renderHistory();
+    }
+
+    function saveHomework() {
+      const total = parseFloat(document.getElementById('homeworkTotal').value);
+      const done = parseFloat(document.getElementById('homeworkDone').value);
+      if (!total && total !== 0) { showToast('请输入应做人数'); return; }
+      const records = getRecords();
+      records.unshift({ type: 'homework', total, done, rate: calcHomeworkRate(), time: formatDate(new Date()) });
+      saveRecords(records);
+      showToast('作业率已保存 ✓');
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const list = document.getElementById('history-list');
+      const records = getRecords();
+      if (records.length === 0) { list.innerHTML = '<div style="text-align:center;color:#999;padding:20px;">暂无记录</div>'; return; }
+      list.innerHTML = records.slice(0, 20).map(r => {
+        if (r.type === 'online') {
+          return `<div class="history-item">
+            <div class="time">📶 上线率 · ${r.time}</div>
+            <div class="data">
+              <span class="tag">应到 ${r.total}</span>
+              <span class="tag">实到 ${r.actual}</span>
+              <span class="tag">请假 ${r.leave}</span>
+              <span class="tag">视频 ${r.video || 0}</span>
+              <span class="tag" style="background:#667eea;color:white;">${r.rate}</span>
+            </div>
+          </div>`;
+        } else {
+          return `<div class="history-item">
+            <div class="time">📝 作业率 · ${r.time}</div>
+            <div class="data">
+              <span class="tag">应做 ${r.total}</span>
+              <span class="tag">完成 ${r.done}</span>
+              <span class="tag" style="background:#667eea;color:white;">${r.rate}</span>
+            </div>
+          </div>`;
+        }
+      }).join('');
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('online-panel').style.display = tab === 'online' ? 'block' : 'none';
+      document.getElementById('homework-panel').style.display = tab === 'homework' ? 'block' : 'none';
+      document.getElementById('history-panel').style.display = tab === 'history' ? 'block' : 'none';
+      if (tab === 'history') renderHistory();
+    }
+
+    // 初始化
+    renderHistory();
+  </script>
+</body>
+</html>
