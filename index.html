@@ -11,7 +11,7 @@
     .header h1 { font-size: 20px; margin-bottom: 4px; }
     .header p { font-size: 12px; opacity: 0.8; }
     .card { background: white; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-    .card-title { font-size: 16px; font-weight: 600; color: #333; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #667eea; }
+    .card-title { font-size: 16px; font-weight: 600; color: #333; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #667eea; display: flex; align-items: center; gap: 8px; }
     .form-item { margin-bottom: 14px; }
     .form-item label { display: block; font-size: 13px; color: #666; margin-bottom: 6px; }
     .form-item input { width: 100%; padding: 12px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 16px; transition: border-color 0.2s; -webkit-appearance: none; }
@@ -21,23 +21,39 @@
     .result-value { font-size: 28px; font-weight: 700; color: #667eea; }
     .btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 8px; }
     .btn:active { opacity: 0.9; }
-    .history-title { font-size: 14px; color: #666; margin-bottom: 10px; }
-    .history-item { background: #f9f9f9; border-radius: 8px; padding: 12px; margin-bottom: 8px; font-size: 12px; color: #555; }
-    .history-item .time { color: #999; font-size: 11px; margin-bottom: 4px; }
-    .history-item .data { display: flex; gap: 12px; flex-wrap: wrap; }
-    .history-item .tag { background: #e8eaff; color: #667eea; padding: 2px 8px; border-radius: 4px; }
+    .btn-secondary { background: linear-gradient(135deg, #48c6ef 0%, #6f86d6 100%); }
+    .btn-outline { background: white; color: #667eea; border: 2px solid #667eea; }
     .tabs { display: flex; gap: 8px; margin-bottom: 16px; }
     .tab { flex: 1; padding: 10px; background: white; border: 1px solid #e0e0e0; border-radius: 8px; text-align: center; font-size: 14px; cursor: pointer; }
     .tab.active { background: #667eea; color: white; border-color: #667eea; }
+    .history-title { font-size: 14px; color: #666; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+    .history-item { background: #f9f9f9; border-radius: 8px; padding: 12px; margin-bottom: 8px; font-size: 12px; color: #555; }
+    .history-item .time { color: #999; font-size: 11px; margin-bottom: 4px; }
+    .history-item .data { display: flex; gap: 8px; flex-wrap: wrap; }
+    .history-item .tag { background: #e8eaff; color: #667eea; padding: 2px 8px; border-radius: 4px; }
     .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #333; color: white; padding: 10px 20px; border-radius: 8px; font-size: 14px; z-index: 999; opacity: 0; transition: opacity 0.3s; }
     .toast.show { opacity: 1; }
+    .info-box { background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 12px; margin-bottom: 16px; font-size: 13px; color: #92400e; }
+    .info-box a { color: #667eea; }
+    .feishu-link { display: inline-block; background: #00a1d4; color: white; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 600; margin: 8px 0; }
+    .feishu-link:hover { background: #0095b3; }
+    .export-area { background: #f3f4f6; border-radius: 8px; padding: 12px; margin-top: 12px; }
+    .export-area textarea { width: 100%; height: 80px; border: 1px solid #ddd; border-radius: 6px; padding: 8px; font-size: 12px; resize: none; font-family: monospace; }
   </style>
 </head>
 <body>
   <div class="header">
     <h1>📊 数据填报系统</h1>
-    <p>每日数据上报</p>
+    <p>多账号数据同步到飞书多维表格</p>
   </div>
+
+  <div class="info-box">
+    💡 <strong>使用说明：</strong>填写数据后点击「保存上报」，数据会保存到本地。然后点击「同步到飞书」复制数据，再粘贴到下方的飞书多维表格导入区域。
+  </div>
+
+  <a class="feishu-link" href="https://jcnzx7lpadrv.feishu.cn/base/Y47Lb8jYGa8mBRsZkQdcqj6Snhe" target="_blank">
+    📋 打开飞书多维表格（导入数据）
+  </a>
 
   <div class="tabs">
     <div class="tab active" onclick="switchTab('online')">📶 上线率</div>
@@ -48,6 +64,10 @@
   <!-- 上线率填报 -->
   <div id="online-panel" class="card">
     <div class="card-title">📶 上线率填报</div>
+    <div class="form-item">
+      <label>填报人</label>
+      <input type="text" id="onlineReporter" placeholder="输入你的名字">
+    </div>
     <div class="form-item">
       <label>应到人数</label>
       <input type="number" id="totalCount" placeholder="输入应到人数" min="0">
@@ -69,11 +89,16 @@
       <div class="result-value" id="onlineRate">—</div>
     </div>
     <button class="btn" onclick="saveOnline()">保存上报</button>
+    <button class="btn btn-outline" onclick="exportOnline()">📋 复制数据（同步到飞书）</button>
   </div>
 
   <!-- 作业率填报 -->
   <div id="homework-panel" class="card" style="display:none;">
     <div class="card-title">📝 作业率填报</div>
+    <div class="form-item">
+      <label>填报人</label>
+      <input type="text" id="homeworkReporter" placeholder="输入你的名字">
+    </div>
     <div class="form-item">
       <label>应做作业人数</label>
       <input type="number" id="homeworkTotal" placeholder="输入应做作业人数" min="0">
@@ -87,12 +112,32 @@
       <div class="result-value" id="homeworkRate">—</div>
     </div>
     <button class="btn" onclick="saveHomework()">保存上报</button>
+    <button class="btn btn-outline" onclick="exportHomework()">📋 复制数据（同步到飞书）</button>
   </div>
 
   <!-- 历史记录 -->
   <div id="history-panel" class="card" style="display:none;">
     <div class="card-title">📋 历史记录</div>
+    <div class="history-title">
+      <span>最近20条记录</span>
+    </div>
     <div id="history-list"></div>
+  </div>
+
+  <!-- 飞书导入说明 -->
+  <div id="feishu-import-panel" class="card" style="display:none;">
+    <div class="card-title">📥 飞书数据导入</div>
+    <div class="info-box">
+      <strong>导入步骤：</strong><br>
+      1. 点击上方「打开飞书多维表格」链接<br>
+      2. 在「上线率记录」或「作业率记录」表中<br>
+      3. 新建记录，将复制的数据粘贴到对应字段
+    </div>
+    <div class="export-area">
+      <label>导出的数据（点击下方按钮获取）：</label>
+      <textarea id="exportData" readonly placeholder="点击「复制数据」按钮后，数据会显示在这里"></textarea>
+    </div>
+    <button class="btn btn-secondary" onclick="copyExportData()">📋 复制已导出的数据</button>
   </div>
 
   <div class="toast" id="toast"></div>
@@ -146,28 +191,93 @@
       return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
     }
 
+    function getTodayDate() {
+      const d = new Date();
+      const pad = n => n.toString().padStart(2, '0');
+      return `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())}`;
+    }
+
     function saveOnline() {
+      const reporter = document.getElementById('onlineReporter').value.trim();
       const total = parseFloat(document.getElementById('totalCount').value);
       const actual = parseFloat(document.getElementById('actualCount').value);
       const leave = parseFloat(document.getElementById('leaveCount').value);
       const video = parseFloat(document.getElementById('videoCount').value);
       if (!total && total !== 0) { showToast('请输入应到人数'); return; }
       const records = getRecords();
-      records.unshift({ type: 'online', total, actual, leave, video, rate: calcOnlineRate(), time: formatDate(new Date()) });
+      const now = new Date();
+      records.unshift({ type: 'online', reporter, total, actual, leave, video, rate: calcOnlineRate(), date: getTodayDate(), time: formatDate(now), timestamp: now.getTime() });
       saveRecords(records);
       showToast('上线率已保存 ✓');
       renderHistory();
     }
 
     function saveHomework() {
+      const reporter = document.getElementById('homeworkReporter').value.trim();
       const total = parseFloat(document.getElementById('homeworkTotal').value);
       const done = parseFloat(document.getElementById('homeworkDone').value);
       if (!total && total !== 0) { showToast('请输入应做人数'); return; }
       const records = getRecords();
-      records.unshift({ type: 'homework', total, done, rate: calcHomeworkRate(), time: formatDate(new Date()) });
+      const now = new Date();
+      records.unshift({ type: 'homework', reporter, total, done, rate: calcHomeworkRate(), date: getTodayDate(), time: formatDate(now), timestamp: now.getTime() });
       saveRecords(records);
       showToast('作业率已保存 ✓');
       renderHistory();
+    }
+
+    function exportOnline() {
+      const reporter = document.getElementById('onlineReporter').value.trim();
+      const total = parseFloat(document.getElementById('totalCount').value);
+      const actual = parseFloat(document.getElementById('actualCount').value);
+      const leave = parseFloat(document.getElementById('leaveCount').value);
+      const video = parseFloat(document.getElementById('videoCount').value);
+      if (!total && total !== 0) { showToast('请先填写完整数据'); return; }
+
+      const data = {
+        date: getTodayDate(),
+        reporter: reporter || '未填写',
+        应到人数: total,
+        实到人数: actual,
+        请假人数: leave,
+        视频人数: video || 0,
+        上线率: calcOnlineRate()
+      };
+
+      document.getElementById('exportData').value = JSON.stringify(data, null, 2);
+      showToast('数据已导出，点击复制按钮 ✌️');
+      switchTab('feishu');
+    }
+
+    function exportHomework() {
+      const reporter = document.getElementById('homeworkReporter').value.trim();
+      const total = parseFloat(document.getElementById('homeworkTotal').value);
+      const done = parseFloat(document.getElementById('homeworkDone').value);
+      if (!total && total !== 0) { showToast('请先填写完整数据'); return; }
+
+      const data = {
+        date: getTodayDate(),
+        reporter: reporter || '未填写',
+        应做作业人数: total,
+        作业完成人数: done,
+        作业率: calcHomeworkRate()
+      };
+
+      document.getElementById('exportData').value = JSON.stringify(data, null, 2);
+      showToast('数据已导出，点击复制按钮 ✌️');
+      switchTab('feishu');
+    }
+
+    function copyExportData() {
+      const data = document.getElementById('exportData').value;
+      if (!data) { showToast('没有可复制的数据'); return; }
+      navigator.clipboard.writeText(data).then(() => {
+        showToast('已复制到剪贴板 ✓');
+      }).catch(() => {
+        // 降级方案
+        document.getElementById('exportData').select();
+        document.execCommand('copy');
+        showToast('已复制到剪贴板 ✓');
+      });
     }
 
     function renderHistory() {
@@ -177,7 +287,7 @@
       list.innerHTML = records.slice(0, 20).map(r => {
         if (r.type === 'online') {
           return `<div class="history-item">
-            <div class="time">📶 上线率 · ${r.time}</div>
+            <div class="time">📶 上线率 · ${r.reporter || ''} · ${r.time}</div>
             <div class="data">
               <span class="tag">应到 ${r.total}</span>
               <span class="tag">实到 ${r.actual}</span>
@@ -188,7 +298,7 @@
           </div>`;
         } else {
           return `<div class="history-item">
-            <div class="time">📝 作业率 · ${r.time}</div>
+            <div class="time">📝 作业率 · ${r.reporter || ''} · ${r.time}</div>
             <div class="data">
               <span class="tag">应做 ${r.total}</span>
               <span class="tag">完成 ${r.done}</span>
@@ -205,6 +315,7 @@
       document.getElementById('online-panel').style.display = tab === 'online' ? 'block' : 'none';
       document.getElementById('homework-panel').style.display = tab === 'homework' ? 'block' : 'none';
       document.getElementById('history-panel').style.display = tab === 'history' ? 'block' : 'none';
+      document.getElementById('feishu-import-panel').style.display = tab === 'feishu' ? 'block' : 'none';
       if (tab === 'history') renderHistory();
     }
 
